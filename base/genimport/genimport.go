@@ -272,6 +272,8 @@ func init() {
 func (gen *genimport) writeBinds() {
 	d := gen.mapdecl("Binds: map[string]%sValue")
 
+    gen_short_name_ := gen.pkgrenames[gen.gpkg.Path()] + "."
+    
 	for _, name := range gen.names {
 		if obj := gen.scope.Lookup(name); obj.Exported() {
 			switch obj := obj.(type) {
@@ -287,18 +289,16 @@ func (gen *genimport) writeBinds() {
 					}
 				}
 				d.header()
-				fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(%s%s%s%s),",
-					name, gen.reflect, conv1, gen.name_, name, conv2)
+				fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(%s%s%s%s),", name, gen.reflect, conv1, gen_short_name_, name, conv2)
 			case *types.Var:
 				d.header()
-				fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(&%s%s).Elem(),", name, gen.reflect, gen.name_, name)
+				fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(&%s%s).Elem(),", name, gen.reflect, gen_short_name_, name)
 			case *types.Func:
 				if isGenericFunc(obj) {
 					gen.output.Warnf("skipping import of %v:\timporting generic functions is not supported yet", name)
 				} else {
 					d.header()
-					fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(%s%s),",
-						name, gen.reflect, gen.name_, name)
+					fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sValueOf(%s%s),", name, gen.reflect, gen_short_name_, name)
 				}
 			}
 		}
@@ -309,6 +309,8 @@ func (gen *genimport) writeBinds() {
 func (gen *genimport) writeTypes() {
 	d := gen.mapdecl("Types: map[string]%sType")
 
+    gen_short_name_ := gen.pkgrenames[gen.gpkg.Path()] + "."
+    
 	for _, name := range gen.names {
 		if obj := gen.scope.Lookup(name); obj.Exported() {
 			switch obj := obj.(type) {
@@ -318,8 +320,7 @@ func (gen *genimport) writeTypes() {
 						obj.Pkg().Path(), obj.Name())
 				} else {
 					d.header()
-					fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sTypeOf((*%s%s)(nil)).Elem(),",
-						name, gen.reflect, gen.name_, name)
+					fmt.Fprintf(gen.out, "\n\t\t\t%q:\t%sTypeOf((*%s%s)(nil)).Elem(),", name, gen.reflect, gen_short_name_, name)
 				}
 			}
 		}
